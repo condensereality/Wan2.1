@@ -26,12 +26,21 @@ dependencies = [
     "ftfy",
     "dashscope",
     "imageio-ffmpeg",
-    "flash_attn",
     "gradio>=5.0.0",
     "numpy>=1.23.5,<2"
 ]
 
+
+[tool.uv]
+no-build-isolation-package = ["flash-attn"]
+
+[[tool.uv.dependency-metadata]]
+name = "flash-attn"
+requires-dist = ["torch", "einops"]
+
 [project.optional-dependencies]
+build = ["torch", "setuptools", "packaging"]
+compile = ["flash-attn"]
 dev = [
     "pytest",
     "black",
