@@ -20,6 +20,7 @@ import torchvision.transforms.functional as TF
 from PIL import Image
 from tqdm import tqdm
 
+from .model_loader import VaceWanModelLoader
 from .modules.vace_model import VaceWanModel
 from .text2video import (
     FlowDPMSolverMultistepScheduler,
@@ -40,6 +41,7 @@ class WanVace(WanT2V):
         self,
         config,
         checkpoint_dir,
+        type,
         device_id=0,
         rank=0,
         t5_fsdp=False,
@@ -57,6 +59,7 @@ class WanVace(WanT2V):
                 Path to directory containing model checkpoints
             device_id (`int`,  *optional*, defaults to 0):
                 Id of target GPU device
+            type ('str', "type of model"):
             rank (`int`,  *optional*, defaults to 0):
                 Process rank for distributed training
             t5_fsdp (`bool`, *optional*, defaults to False):
@@ -69,12 +72,18 @@ class WanVace(WanT2V):
                 Whether to place T5 model on CPU. Only works without t5_fsdp.
         """
         self.device = torch.device(f"cuda:{device_id}")
+        self.type = type
         self.config = config
         self.rank = rank
         self.t5_cpu = t5_cpu
 
         self.num_train_timesteps = config.num_train_timesteps
         self.param_dtype = config.param_dtype
+
+
+        self.model = VaceWanModelLoader().load_model(checkpoint_dir=checkpoint_dir,
+                                                     model_type=self.type)
+        self.model.eval().requires_grad_(False)
 
         shard_fn = partial(shard_model, device_id=device_id)
         self.text_encoder = T5EncoderModel(
@@ -91,9 +100,6 @@ class WanVace(WanT2V):
             vae_pth=os.path.join(checkpoint_dir, config.vae_checkpoint),
             device=self.device)
 
-        logging.info(f"Creating VaceWanModel from {checkpoint_dir}")
-        self.model = VaceWanModel.from_pretrained(checkpoint_dir)
-        self.model.eval().requires_grad_(False)
 
         if use_usp:
             from xfuser.core.distributed import get_sequence_parallel_world_size
