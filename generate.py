@@ -523,6 +523,7 @@ def generate(args):
         wan_vace = wan.WanVace(
             config=cfg,
             checkpoint_dir=args.ckpt_dir,
+            type=args.task,
             device_id=device,
             rank=rank,
             t5_fsdp=args.t5_fsdp,
