@@ -2495,7 +2495,7 @@ requires-dist = [
     { name = "imageio-ffmpeg" },
     { name = "isort", marker = "extra == 'dev'" },
     { name = "mypy", marker = "extra == 'dev'" },
-    { name = "numpy", specifier = ">=1.23.5,<2" },
+    { name = "numpy", specifier = ">=1.23.5" },
     { name = "opencv-python", specifier = ">=4.9.0.80" },
     { name = "packaging", marker = "extra == 'build'" },
     { name = "pytest", marker = "extra == 'dev'" },
